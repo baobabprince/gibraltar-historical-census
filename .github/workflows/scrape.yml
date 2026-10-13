@@ -13,10 +13,10 @@ on:
       max_records:
         description: 'Maximum number of NEW records to fetch in this run'
         required: true
-        default: '100'
+        default: '50'
         type: string
       delay:
-        description: 'Delay between requests in seconds (be polite)'
+        description: 'Delay between requests in seconds'
         required: false
         default: '0.5'
         type: string
@@ -42,44 +42,26 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests beautifulsoup4
+        run: pip install requests beautifulsoup4
 
       - name: Run scraper (auto-resumes)
         run: |
-          echo "Year: ${{ inputs.year }}"
-          echo "Max new records: ${{ inputs.max_records }}"
-          echo "Delay: ${{ inputs.delay }}"
-          echo "Resume point is determined automatically from existing data/"
-          
+          echo "Year=${{ inputs.year }} Max=${{ inputs.max_records }} Delay=${{ inputs.delay }}"
           python scripts/scrape_census.py \
-            --year ${{ inputs.year }} \
-            --max ${{ inputs.max_records }} \
-            --delay ${{ inputs.delay }} \
-            --output data/${{ inputs.year }}
+            --year "${{ inputs.year }}" \
+            --max "${{ inputs.max_records }}" \
+            --delay "${{ inputs.delay }}" \
+            --output "data/${{ inputs.year }}"
 
       - name: Show summary
         run: |
-          if [ -f data/${{ inputs.year }}/meta.json ]; then
-            echo "=== Meta ==="
-            cat data/${{ inputs.year }}/meta.json
-            echo ""
-            echo "=== Preview (last 3 records) ==="
-            python -c "
-          import json
-          data = json.load(open('data/${{ inputs.year }}/records.json'))
-          print(f'Total records in file: {len(data)}')
-          for r in data[-3:]:
-              print(f\"  {r.get('record_num')}: {r.get('surname')} {r.get('forename')} ({r.get('id')})\")
-          "
-          else
-            echo "No meta.json found – scrape may have failed"
-            exit 1
-          fi
+          echo "=== Meta ==="
+          cat "data/${{ inputs.year }}/meta.json" || true
+          echo ""
+          echo "=== Record count ==="
+          python -c "import json; d=json.load(open('data/${{ inputs.year }}/records.json')); print(len(d), 'records')"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -92,21 +74,16 @@ jobs:
           retention-days: 30
 
       - name: Commit and push results
-        if: ${{ inputs.commit_results }}
+        if: inputs.commit_results == true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          git add data/${{ inputs.year }}/
-          
+          git add "data/${{ inputs.year }}/"
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             COUNT=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json'))['extracted'])")
             NEW=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json')).get('last_run_new', 0))")
-            git commit -m "data: update ${{ inputs.year }} census – ${COUNT} total (+${NEW} new)
-            
-            Auto-resumed. max=${{ inputs.max_records }}
-            Run: ${{ github.run_id }}"
+            git commit -m "data: update ${{ inputs.year }} census – ${COUNT} total (+${NEW} new)"
             git push
           fi
