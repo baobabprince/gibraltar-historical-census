@@ -13,7 +13,7 @@ on:
       max_records:
         description: 'Maximum number of NEW records to fetch in this run'
         required: true
-        default: '50'
+        default: '100'
         type: string
       delay:
         description: 'Delay between requests in seconds'
@@ -26,6 +26,11 @@ on:
         default: true
         type: boolean
 
+# Prevent concurrent scrapes from fighting over the same branch/data
+concurrency:
+  group: scrape-census-${{ inputs.year || '1911' }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -37,6 +42,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -49,7 +57,7 @@ jobs:
       - name: Run scraper (auto-resumes)
         run: |
           echo "Year=${{ inputs.year }} Max=${{ inputs.max_records }} Delay=${{ inputs.delay }}"
-          python scripts/scrape_census.py \
+          python -u scripts/scrape_census.py \
             --year "${{ inputs.year }}" \
             --max "${{ inputs.max_records }}" \
             --delay "${{ inputs.delay }}" \
@@ -78,12 +86,35 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           git add "data/${{ inputs.year }}/"
+
           if git diff --staged --quiet; then
             echo "No changes to commit"
-          else
-            COUNT=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json'))['extracted'])")
-            NEW=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json')).get('last_run_new', 0))")
-            git commit -m "data: update ${{ inputs.year }} census – ${COUNT} total (+${NEW} new)"
-            git push
+            exit 0
           fi
+
+          COUNT=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json'))['extracted'])")
+          NEW=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json')).get('last_run_new', 0))")
+          git commit -m "data: update ${{ inputs.year }} census – ${COUNT} total (+${NEW} new)"
+
+          # Avoid race: rebase onto latest main, then push with retries
+          git pull --rebase origin main || {
+            echo "Rebase had issues – falling back to merge"
+            git rebase --abort || true
+            git fetch origin main
+            git merge origin/main -m "merge remote main before data push" || true
+          }
+
+          for i in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Push succeeded"
+              exit 0
+            fi
+            echo "Push rejected (attempt $i) – pulling and retrying..."
+            git pull --rebase origin main || git pull origin main --no-edit || true
+            sleep 2
+          done
+
+          echo "Push failed after retries – data is still available as artifact"
+          exit 1
