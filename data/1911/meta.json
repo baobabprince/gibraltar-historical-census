@@ -1,0 +1,9 @@
+{
+  "year": 1911,
+  "enumeration_date": "2 April 1911",
+  "source_url": "https://www.nationalarchives.gi/1911.aspx",
+  "total_records_in_source": 14951,
+  "extracted_so_far": 80,
+  "status": "in_progress",
+  "notes": "Initial extraction. Some original field labels appear swapped (e.g. religion/education). Full scrape continuing."
+}
