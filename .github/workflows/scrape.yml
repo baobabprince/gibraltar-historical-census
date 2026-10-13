@@ -11,19 +11,14 @@ on:
         options:
           - '1911'
       max_records:
-        description: 'Maximum number of new records to fetch in this run'
+        description: 'Maximum number of NEW records to fetch in this run'
         required: true
         default: '100'
         type: string
       delay:
-        description: 'Delay between requests in seconds (be polite to the server)'
+        description: 'Delay between requests in seconds (be polite)'
         required: false
         default: '0.5'
-        type: string
-      start_from:
-        description: 'Start from record number (1 = beginning)'
-        required: false
-        default: '1'
         type: string
       commit_results:
         description: 'Commit extracted data back to the repository'
@@ -54,18 +49,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4
 
-      - name: Run scraper
+      - name: Run scraper (auto-resumes)
         run: |
           echo "Year: ${{ inputs.year }}"
-          echo "Max records: ${{ inputs.max_records }}"
+          echo "Max new records: ${{ inputs.max_records }}"
           echo "Delay: ${{ inputs.delay }}"
-          echo "Start from: ${{ inputs.start_from }}"
+          echo "Resume point is determined automatically from existing data/"
           
           python scripts/scrape_census.py \
             --year ${{ inputs.year }} \
             --max ${{ inputs.max_records }} \
             --delay ${{ inputs.delay }} \
-            --start-from ${{ inputs.start_from }} \
             --output data/${{ inputs.year }}
 
       - name: Show summary
@@ -74,12 +68,12 @@ jobs:
             echo "=== Meta ==="
             cat data/${{ inputs.year }}/meta.json
             echo ""
-            echo "=== Preview ==="
+            echo "=== Preview (last 3 records) ==="
             python -c "
           import json
           data = json.load(open('data/${{ inputs.year }}/records.json'))
           print(f'Total records in file: {len(data)}')
-          for r in data[:3]:
+          for r in data[-3:]:
               print(f\"  {r.get('record_num')}: {r.get('surname')} {r.get('forename')} ({r.get('id')})\")
           "
           else
@@ -109,9 +103,10 @@ jobs:
             echo "No changes to commit"
           else
             COUNT=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json'))['extracted'])")
-            git commit -m "data: update ${{ inputs.year }} census – ${COUNT} records extracted
+            NEW=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json')).get('last_run_new', 0))")
+            git commit -m "data: update ${{ inputs.year }} census – ${COUNT} total (+${NEW} new)
             
-            Triggered by workflow_dispatch (max=${{ inputs.max_records }}, start_from=${{ inputs.start_from }})
+            Auto-resumed. max=${{ inputs.max_records }}
             Run: ${{ github.run_id }}"
             git push
           fi
