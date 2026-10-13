@@ -1,1 +1,117 @@
-PLACEHOLDER2
+name: Scrape Gibraltar Census
+
+on:
+  workflow_dispatch:
+    inputs:
+      year:
+        description: 'Census year to scrape'
+        required: true
+        default: '1911'
+        type: choice
+        options:
+          - '1911'
+      max_records:
+        description: 'Maximum number of new records to fetch in this run'
+        required: true
+        default: '100'
+        type: string
+      delay:
+        description: 'Delay between requests in seconds (be polite to the server)'
+        required: false
+        default: '0.5'
+        type: string
+      start_from:
+        description: 'Start from record number (1 = beginning)'
+        required: false
+        default: '1'
+        type: string
+      commit_results:
+        description: 'Commit extracted data back to the repository'
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Run scraper
+        run: |
+          echo "Year: ${{ inputs.year }}"
+          echo "Max records: ${{ inputs.max_records }}"
+          echo "Delay: ${{ inputs.delay }}"
+          echo "Start from: ${{ inputs.start_from }}"
+          
+          python scripts/scrape_census.py \
+            --year ${{ inputs.year }} \
+            --max ${{ inputs.max_records }} \
+            --delay ${{ inputs.delay }} \
+            --start-from ${{ inputs.start_from }} \
+            --output data/${{ inputs.year }}
+
+      - name: Show summary
+        run: |
+          if [ -f data/${{ inputs.year }}/meta.json ]; then
+            echo "=== Meta ==="
+            cat data/${{ inputs.year }}/meta.json
+            echo ""
+            echo "=== Preview ==="
+            python -c "
+          import json
+          data = json.load(open('data/${{ inputs.year }}/records.json'))
+          print(f'Total records in file: {len(data)}')
+          for r in data[:3]:
+              print(f\"  {r.get('record_num')}: {r.get('surname')} {r.get('forename')} ({r.get('id')})\")
+          "
+          else
+            echo "No meta.json found – scrape may have failed"
+            exit 1
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: census-${{ inputs.year }}-${{ github.run_id }}
+          path: |
+            data/${{ inputs.year }}/records.json
+            data/${{ inputs.year }}/records.csv
+            data/${{ inputs.year }}/meta.json
+          retention-days: 30
+
+      - name: Commit and push results
+        if: ${{ inputs.commit_results }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add data/${{ inputs.year }}/
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            COUNT=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json'))['extracted'])")
+            git commit -m "data: update ${{ inputs.year }} census – ${COUNT} records extracted
+            
+            Triggered by workflow_dispatch (max=${{ inputs.max_records }}, start_from=${{ inputs.start_from }})
+            Run: ${{ github.run_id }}"
+            git push
+          fi
