@@ -1,0 +1,6 @@
+﻿year,id,record_num,surname,forename,sex,age,birthplace,religion,education,occupation,street,houseNo,maritalStatus,familyRelationship,employmentPosition,notes,division,district
+1911,5811,1,(CHIVASCO),Emilio,M,16,Malaga,SPAIN     (British Subject),Roman Catholic,read & write,14,Civil Hospital Ramp,9,Single,Son,British Subject,3rd,
+1911,530,2,(COLOMBO)     (?),(Angel)     (?),M ?,,GIBRALTAR,Roman Catholic,Read & Write,Builder,Waterport Street,2,,Head,Employer,House 4 and,2nd,3
+1911,7892,3,(PINCHO),Juan,M,23,GIBRALTAR,Roman Catholic,neither,Coal Labourer,Devils Gap Road,42,Single,Son,Worker,,3rd,25
+1911,7893,4,(PINCHO),Magdalena,F,21,GIBRALTAR,Roman Catholic,neither,,Devils Gap Road,42,Single,Daughter,,,3rd,25
+1911,7894,5,(PINCHO),Jose,M,19,GIBRALTAR,Roman Catholic,neither,Cart Driver,Devils Gap Road,42,Single,Son,Worker,,3rd,25
