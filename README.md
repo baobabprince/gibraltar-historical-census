@@ -1,52 +1,41 @@
 # Gibraltar Historical Census
 
-Modern, searchable web interface for the historical **Inhabitants of Gibraltar** registers and census data originally published by the [Gibraltar National Archives](https://www.nationalarchives.gi/Inhabitants.aspx).
+Modern, searchable web interface for the historical **Inhabitants of Gibraltar** registers from the [Gibraltar National Archives](https://www.nationalarchives.gi/).
 
-The original site uses outdated ASP.NET technology with a cumbersome one-record-at-a-time interface and no convenient bulk download. This project aims to make the data freely accessible in a modern format.
+Converts the outdated ASP.NET interface into a clean, filterable dataset hosted on GitHub Pages.
 
-## Live Site
+## Live site
 
-Once GitHub Pages is enabled: **https://baobabprince.github.io/gibraltar-historical-census/**
+Once GitHub Pages is enabled (Settings → Pages → Deploy from branch `master` / `main`), the site will be at:
 
-## Goals
+**https://baobabprince.github.io/gibraltar-historical-census/**
 
-- Full-text search across all fields
-- Filters by year, surname, forename, sex, age, birthplace, occupation, religion, address, marital status, family relationship, etc.
-- Clean, responsive interface
-- Downloadable CSV / JSON
-- Proper attribution to the Gibraltar National Archives
+## Data status (1911)
 
-## Data Coverage (planned)
+| Metric | Value |
+|--------|-------|
+| Total in source | 14,951 |
+| Extracted so far | 75 |
+| Next resume | record 76 |
 
-| Year / Period | Records (approx.) | Status |
-|---------------|-------------------|--------|
-| 1309–1545     | 118               | Pending |
-| 1777–1791     | 6,122             | Pending |
-| 1814          | 1,853             | Pending |
-| 1816          | 6,679             | Pending |
-| 1834          | 14,569            | Pending |
-| 1868          | 15,405            | Pending |
-| 1871          | 22,725            | Pending |
-| 1878          | 17,982            | Pending |
-| 1881          | 18,616            | Pending |
-| 1901          | 19,342            | Pending |
-| 1911          | 14,951            | Sample |
-| 1921          | ~18,700           | Pending |
-| Abstracts 1767–2001 | —            | In progress |
-| Historical Account | —             | Available |
+Files: `data/1911/records.json`, `records.csv`, `meta.json`
+
+## Scraper
+
+```bash
+pip install -r requirements.txt
+python scripts/scrape_census.py --year 1911 --max 100 --delay 0.5
+```
+
+Auto-resumes from the last extracted record.
+
+## GitHub Action
+
+**Actions → Scrape Gibraltar Census → Run workflow**
+
+Inputs: `year`, `max_records`, `delay`, `commit_results`
 
 ## Source
 
-All data originates from the Gibraltar National Archives project *Inhabitants of Gibraltar*.  
-Please respect the original source and use the data for non-commercial research, genealogy and historical study.
-
-Original site: https://www.nationalarchives.gi/Inhabitants.aspx
-
-## License
-
-Data remains the property of the Gibraltar National Archives / Government of Gibraltar.  
-Code in this repository is released under the MIT License.
-
-## Contributing
-
-Help with data extraction, cleaning, OCR of scanned registers, or UI improvements is welcome. Open an issue or pull request.
+- https://www.nationalarchives.gi/1911.aspx
+- Other years can be added to `YEAR_CONFIG` in the scraper.
