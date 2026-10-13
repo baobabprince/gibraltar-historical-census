@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מפקד האוכלוסין ההיסטורי של גיברלטר | Gibraltar Historical Census</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>מפקד האוכלוסין ההיסטורי של גיברלטר</h1>
+      <p class="subtitle">Gibraltar Historical Census &amp; Inhabitants Registers</p>
+      <p class="source">מבוסס על נתוני <a href="https://www.nationalarchives.gi/Inhabitants.aspx" target="_blank" rel="noopener">Gibraltar National Archives</a></p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="search-panel">
+      <div class="search-row">
+        <input type="search" id="q" placeholder="חיפוש חופשי (שם, כתובת, עיסוק...)" autocomplete="off">
+        <button id="searchBtn">חפש</button>
+      </div>
+
+      <div class="filters">
+        <select id="year">
+          <option value="">כל השנים</option>
+          <option value="1911">1911 (דוגמה)</option>
+          <!-- more years will be added as data is extracted -->
+        </select>
+
+        <select id="sex">
+          <option value="">מין</option>
+          <option value="M">זכר</option>
+          <option value="F">נקבה</option>
+        </select>
+
+        <input type="text" id="surname" placeholder="שם משפחה">
+        <input type="text" id="forename" placeholder="שם פרטי">
+        <input type="text" id="birthplace" placeholder="מקום לידה">
+        <input type="text" id="occupation" placeholder="עיסוק">
+        <input type="text" id="address" placeholder="כתובת / רחוב">
+      </div>
+    </section>
+
+    <section class="results-meta">
+      <span id="resultCount">0 תוצאות</span>
+      <button id="exportCsv" class="secondary" disabled>ייצוא CSV</button>
+    </section>
+
+    <section class="table-wrapper">
+      <table id="results">
+        <thead>
+          <tr>
+            <th>שנה</th>
+            <th>שם משפחה</th>
+            <th>שם פרטי</th>
+            <th>מין</th>
+            <th>גיל</th>
+            <th>מקום לידה</th>
+            <th>עיסוק</th>
+            <th>כתובת</th>
+            <th>קשר משפחתי</th>
+            <th>דת / לאום</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section class="info">
+      <h2>על הפרויקט</h2>
+      <p>האתר המקורי של ארכיון גיברלטר הלאומי מציג את נתוני המפקדים ההיסטוריים בממשק ישן ומסורבל. פרויקט זה ממיר את הנתונים לפורמט מודרני עם חיפוש וסינון נוחים.</p>
+      <p><strong>סטטוס נוכחי:</strong> שלד האתר + דוגמת נתונים מ-1911. חילוץ מלא של כל השנים בתהליך.</p>
+      <p>קוד מקור: <a href="https://github.com/baobabprince/gibraltar-historical-census">GitHub</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>נתונים מקוריים © Gibraltar National Archives / Government of Gibraltar</p>
+      <p>קוד האתר ברישיון MIT</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
