@@ -1,56 +1,19 @@
-// Sample data from 1911 (will be replaced / extended with full extracted datasets)
-const SAMPLE_DATA = [
-  {
-    year: 1911,
-    id: "5811",
-    surname: "(CHIVASCO)",
-    forename: "Emilio",
-    sex: "M",
-    age: "16",
-    birthplace: "Malaga",
-    occupation: "read & write",
-    address: "Civil Hospital Ramp",
-    houseNo: "22B",
-    maritalStatus: "Single",
-    familyRelationship: "Son",
-    religion: "Roman Catholic",
-    notes: "British Subject"
-  },
-  {
-    year: 1911,
-    id: "example2",
-    surname: "GARCIA",
-    forename: "Maria",
-    sex: "F",
-    age: "34",
-    birthplace: "Gibraltar",
-    occupation: "At Home",
-    address: "Main Street",
-    houseNo: "45",
-    maritalStatus: "Married",
-    familyRelationship: "Wife",
-    religion: "Roman Catholic",
-    notes: ""
-  },
-  {
-    year: 1911,
-    id: "example3",
-    surname: "COHEN",
-    forename: "Isaac",
-    sex: "M",
-    age: "52",
-    birthplace: "Gibraltar",
-    occupation: "Merchant",
-    address: "Irish Town",
-    houseNo: "12",
-    maritalStatus: "Married",
-    familyRelationship: "Head",
-    religion: "Jewish",
-    notes: ""
-  }
-];
+// Load real data from extracted JSON files
+let ALL_DATA = [];
 
-let currentResults = [];
+async function loadData() {
+  try {
+    const res = await fetch("data/1911/records.json");
+    if (!res.ok) throw new Error("Failed to load 1911 data");
+    const data1911 = await res.json();
+    ALL_DATA = data1911;
+    console.log(`Loaded ${ALL_DATA.length} records`);
+    render(ALL_DATA);
+  } catch (e) {
+    console.error(e);
+    document.getElementById("resultCount").textContent = "שגיאה בטעינת הנתונים";
+  }
+}
 
 function normalize(str) {
   return (str || "").toString().toLowerCase().trim();
@@ -61,7 +24,7 @@ function matches(record, filters) {
     const haystack = [
       record.surname, record.forename, record.birthplace,
       record.occupation, record.address, record.religion,
-      record.familyRelationship, record.notes, record.houseNo
+      record.familyRelationship, record.notes, record.nationality_or_notes
     ].map(normalize).join(" ");
     if (!haystack.includes(filters.q)) return false;
   }
@@ -88,6 +51,8 @@ function getFilters() {
   };
 }
 
+let currentResults = [];
+
 function render(results) {
   currentResults = results;
   const tbody = document.querySelector("#results tbody");
@@ -108,7 +73,7 @@ function render(results) {
       <td>${r.age || ""}</td>
       <td>${r.birthplace || ""}</td>
       <td>${r.occupation || ""}</td>
-      <td>${[r.address, r.houseNo].filter(Boolean).join(" ")}</td>
+      <td>${r.address || ""}</td>
       <td>${r.familyRelationship || ""}</td>
       <td>${r.religion || ""}</td>
     `;
@@ -118,19 +83,18 @@ function render(results) {
 
 function search() {
   const filters = getFilters();
-  // In the future this will search across all loaded year datasets
-  const results = SAMPLE_DATA.filter(r => matches(r, filters));
+  const results = ALL_DATA.filter(r => matches(r, filters));
   render(results);
 }
 
 function exportCsv() {
   if (!currentResults.length) return;
-  const headers = ["year","surname","forename","sex","age","birthplace","occupation","address","houseNo","maritalStatus","familyRelationship","religion","notes"];
+  const headers = ["year","id","surname","forename","sex","age","birthplace","religion","occupation","address","maritalStatus","familyRelationship","notes"];
   const rows = currentResults.map(r =>
     headers.map(h => `"${(r[h] || "").toString().replace(/"/g, '""')}"`).join(",")
   );
-  const csv = [headers.join(","), ...rows].join("\n");
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const csv = ["\uFEFF" + headers.join(","), ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -143,5 +107,5 @@ document.getElementById("searchBtn").addEventListener("click", search);
 document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") search(); });
 document.getElementById("exportCsv").addEventListener("click", exportCsv);
 
-// Initial render
-render(SAMPLE_DATA);
+// Load on start
+loadData();
