@@ -26,7 +26,6 @@ on:
         default: true
         type: boolean
 
-# Prevent concurrent scrapes from fighting over the same branch/data
 concurrency:
   group: scrape-census-${{ inputs.year || '1911' }}
   cancel-in-progress: false
@@ -43,6 +42,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.ref }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -56,7 +56,7 @@ jobs:
 
       - name: Run scraper (auto-resumes)
         run: |
-          echo "Year=${{ inputs.year }} Max=${{ inputs.max_records }} Delay=${{ inputs.delay }}"
+          echo "Branch=${{ github.ref_name }} Year=${{ inputs.year }} Max=${{ inputs.max_records }} Delay=${{ inputs.delay }}"
           python -u scripts/scrape_census.py \
             --year "${{ inputs.year }}" \
             --max "${{ inputs.max_records }}" \
@@ -84,6 +84,10 @@ jobs:
       - name: Commit and push results
         if: inputs.commit_results == true
         run: |
+          set -e
+          BRANCH="${{ github.ref_name }}"
+          echo "Pushing to branch: $BRANCH"
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -98,21 +102,29 @@ jobs:
           NEW=$(python -c "import json; print(json.load(open('data/${{ inputs.year }}/meta.json')).get('last_run_new', 0))")
           git commit -m "data: update ${{ inputs.year }} census – ${COUNT} total (+${NEW} new)"
 
-          # Avoid race: rebase onto latest main, then push with retries
-          git pull --rebase origin main || {
-            echo "Rebase had issues – falling back to merge"
-            git rebase --abort || true
-            git fetch origin main
-            git merge origin/main -m "merge remote main before data push" || true
-          }
+          git fetch origin "$BRANCH" || true
+          if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
+            git pull --rebase origin "$BRANCH" || {
+              echo "Rebase conflict – keeping our data files"
+              git checkout --ours -- "data/${{ inputs.year }}/" 2>/dev/null || true
+              git add "data/${{ inputs.year }}/"
+              GIT_EDITOR=true git rebase --continue || {
+                git rebase --abort || true
+                git pull origin "$BRANCH" --no-rebase --no-edit || true
+                git checkout --ours -- "data/${{ inputs.year }}/" 2>/dev/null || true
+                git add "data/${{ inputs.year }}/"
+                git -c core.editor=true commit --no-edit || true
+              }
+            }
+          fi
 
           for i in 1 2 3; do
-            if git push origin HEAD:main; then
-              echo "Push succeeded"
+            if git push origin "HEAD:$BRANCH"; then
+              echo "Push to $BRANCH succeeded"
               exit 0
             fi
-            echo "Push rejected (attempt $i) – pulling and retrying..."
-            git pull --rebase origin main || git pull origin main --no-edit || true
+            echo "Push rejected (attempt $i) – retrying..."
+            git pull --rebase origin "$BRANCH" || true
             sleep 2
           done
 
