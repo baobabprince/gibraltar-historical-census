@@ -9,16 +9,34 @@ on:
         default: '1911'
         type: choice
         options:
+          - '1704'
+          - '1777'
+          - '1791'
+          - '1814'
+          - '1816'
+          - '1834'
+          - '1868'
+          - '1871'
+          - '1878'
+          - '1881'
+          - '1891'
+          - '1901'
           - '1911'
+          - '1914'
       max_records:
         description: 'Maximum number of NEW records to fetch in this run'
         required: true
         default: '100'
         type: string
       delay:
-        description: 'Delay between requests in seconds'
+        description: 'Delay between requests while collecting (seconds)'
         required: false
         default: '0.5'
+        type: string
+      skip_delay:
+        description: 'Delay while advancing to resume point (seconds). Lower = faster resume'
+        required: false
+        default: '0.05'
         type: string
       commit_results:
         description: 'Commit extracted data back to the repository'
@@ -56,11 +74,12 @@ jobs:
 
       - name: Run scraper (auto-resumes)
         run: |
-          echo "Branch=${{ github.ref_name }} Year=${{ inputs.year }} Max=${{ inputs.max_records }} Delay=${{ inputs.delay }}"
+          echo "Branch=${{ github.ref_name }} Year=${{ inputs.year }} Max=${{ inputs.max_records }} Delay=${{ inputs.delay }} SkipDelay=${{ inputs.skip_delay }}"
           python -u scripts/scrape_census.py \
             --year "${{ inputs.year }}" \
             --max "${{ inputs.max_records }}" \
             --delay "${{ inputs.delay }}" \
+            --skip-delay "${{ inputs.skip_delay }}" \
             --output "data/${{ inputs.year }}"
 
       - name: Show summary
