@@ -1,4 +1,4 @@
-// Gibraltar Historical Census – frontend
+// Gibraltar Historical Census – frontend (loads slim multi-year data)
 let ALL_DATA = [];
 let currentResults = [];
 let page = 0;
@@ -22,21 +22,60 @@ async function loadData() {
   const countEl = document.getElementById("resultCount");
   countEl.textContent = "טוען נתונים...";
   try {
-    const res = await fetch("data/1911/records.json");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    ALL_DATA = data;
-    console.log(`Loaded ${ALL_DATA.length} records`);
-    // Populate year dropdown from data
-    const years = [...new Set(ALL_DATA.map(r => r.year).filter(Boolean))].sort();
+    // Prefer data/index.json (built by Pages workflow); fall back to known years
+    let years = [];
+    try {
+      const idxRes = await fetch("data/index.json");
+      if (idxRes.ok) {
+        const idx = await idxRes.json();
+        years = idx.years || [];
+      }
+    } catch (_) {}
+
+    if (!years.length) {
+      years = [
+        { year: 1911, file: "data/1911/records.slim.json" },
+        { year: 1871, file: "data/1871/records.slim.json" },
+      ];
+    }
+
+    const loaded = [];
+    for (const y of years) {
+      const path = y.file || `data/${y.year}/records.slim.json`;
+      try {
+        const res = await fetch(path);
+        if (!res.ok) {
+          // fallback to full JSON if slim missing
+          const full = await fetch(`data/${y.year}/records.json`);
+          if (!full.ok) continue;
+          const data = await full.json();
+          loaded.push(...data);
+          console.log(`Loaded ${data.length} from ${y.year} (full)`);
+        } else {
+          const data = await res.json();
+          loaded.push(...data);
+          console.log(`Loaded ${data.length} from ${y.year} (slim)`);
+        }
+      } catch (e) {
+        console.warn("Skip year", y.year, e);
+      }
+    }
+
+    ALL_DATA = loaded;
+    if (!ALL_DATA.length) throw new Error("No data files found");
+
     const yearSelect = document.getElementById("year");
+    const uniqueYears = [...new Set(ALL_DATA.map(r => r.year).filter(Boolean))].sort(
+      (a, b) => a - b
+    );
     yearSelect.innerHTML = '<option value="">כל השנים</option>';
-    years.forEach(y => {
+    uniqueYears.forEach(y => {
       const opt = document.createElement("option");
       opt.value = y;
       opt.textContent = y;
       yearSelect.appendChild(opt);
     });
+
     render(ALL_DATA);
   } catch (e) {
     console.error(e);
@@ -59,15 +98,33 @@ function matches(record, filters) {
       field(record, "religion", "nationality", "nationalityReligion"),
       field(record, "familyRelationship", "relationship"),
       field(record, "notes", "remarks"),
-    ].map(normalize).join(" ");
+    ]
+      .map(normalize)
+      .join(" ");
     if (!haystack.includes(filters.q)) return false;
   }
   if (filters.year && String(record.year) !== filters.year) return false;
   if (filters.sex && field(record, "sex") !== filters.sex) return false;
-  if (filters.surname && !normalize(field(record, "surname", "surName", "name")).includes(filters.surname)) return false;
-  if (filters.forename && !normalize(field(record, "forename", "foreName")).includes(filters.forename)) return false;
-  if (filters.birthplace && !normalize(field(record, "birthplace", "birthPlace")).includes(filters.birthplace)) return false;
-  if (filters.occupation && !normalize(field(record, "occupation")).includes(filters.occupation)) return false;
+  if (
+    filters.surname &&
+    !normalize(field(record, "surname", "surName", "name")).includes(filters.surname)
+  )
+    return false;
+  if (
+    filters.forename &&
+    !normalize(field(record, "forename", "foreName")).includes(filters.forename)
+  )
+    return false;
+  if (
+    filters.birthplace &&
+    !normalize(field(record, "birthplace", "birthPlace")).includes(filters.birthplace)
+  )
+    return false;
+  if (
+    filters.occupation &&
+    !normalize(field(record, "occupation")).includes(filters.occupation)
+  )
+    return false;
   if (filters.address && !normalize(addr(record)).includes(filters.address)) return false;
   return true;
 }
@@ -117,7 +174,6 @@ function renderPage() {
     tbody.appendChild(tr);
   });
 
-  // Pagination controls
   let pager = document.getElementById("pager");
   if (!pager) {
     pager = document.createElement("div");
@@ -132,14 +188,28 @@ function renderPage() {
     prev.textContent = "הקודם";
     prev.className = "secondary";
     prev.disabled = page === 0;
-    prev.onclick = () => { page--; renderPage(); window.scrollTo({ top: document.querySelector(".table-wrapper").offsetTop - 20, behavior: "smooth" }); };
+    prev.onclick = () => {
+      page--;
+      renderPage();
+      window.scrollTo({
+        top: document.querySelector(".table-wrapper").offsetTop - 20,
+        behavior: "smooth",
+      });
+    };
     const info = document.createElement("span");
     info.textContent = ` עמוד ${page + 1} מתוך ${totalPages} `;
     const next = document.createElement("button");
     next.textContent = "הבא";
     next.className = "secondary";
     next.disabled = page >= totalPages - 1;
-    next.onclick = () => { page++; renderPage(); window.scrollTo({ top: document.querySelector(".table-wrapper").offsetTop - 20, behavior: "smooth" }); };
+    next.onclick = () => {
+      page++;
+      renderPage();
+      window.scrollTo({
+        top: document.querySelector(".table-wrapper").offsetTop - 20,
+        behavior: "smooth",
+      });
+    };
     pager.append(prev, info, next);
   }
 }
@@ -152,7 +222,21 @@ function search() {
 
 function exportCsv() {
   if (!currentResults.length) return;
-  const headers = ["year", "id", "surname", "forename", "sex", "age", "birthplace", "religion", "occupation", "street", "houseNo", "maritalStatus", "familyRelationship", "notes"];
+  const headers = [
+    "year",
+    "id",
+    "surname",
+    "forename",
+    "sex",
+    "age",
+    "birthplace",
+    "religion",
+    "occupation",
+    "street",
+    "houseNo",
+    "maritalStatus",
+    "familyRelationship",
+  ];
   const rows = currentResults.map(r =>
     headers.map(h => `"${(field(r, h) || "").toString().replace(/"/g, '""')}"`).join(",")
   );
@@ -167,7 +251,9 @@ function exportCsv() {
 }
 
 document.getElementById("searchBtn").addEventListener("click", search);
-document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") search(); });
+document.getElementById("q").addEventListener("keydown", e => {
+  if (e.key === "Enter") search();
+});
 document.getElementById("exportCsv").addEventListener("click", exportCsv);
 
 loadData();
