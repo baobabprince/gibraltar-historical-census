@@ -1,17 +1,46 @@
-// Load real data from extracted JSON files
+// Gibraltar Historical Census – frontend
 let ALL_DATA = [];
+let currentResults = [];
+let page = 0;
+const PAGE_SIZE = 100;
+
+function field(r, ...keys) {
+  for (const k of keys) {
+    if (r[k] != null && r[k] !== "") return r[k];
+  }
+  return "";
+}
+
+function addr(r) {
+  const street = field(r, "street", "address", "streetName");
+  const house = field(r, "houseNo", "houseno", "hseNo");
+  if (street && house) return `${street} ${house}`;
+  return street || house || "";
+}
 
 async function loadData() {
+  const countEl = document.getElementById("resultCount");
+  countEl.textContent = "טוען נתונים...";
   try {
     const res = await fetch("data/1911/records.json");
-    if (!res.ok) throw new Error("Failed to load 1911 data");
-    const data1911 = await res.json();
-    ALL_DATA = data1911;
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    ALL_DATA = data;
     console.log(`Loaded ${ALL_DATA.length} records`);
+    // Populate year dropdown from data
+    const years = [...new Set(ALL_DATA.map(r => r.year).filter(Boolean))].sort();
+    const yearSelect = document.getElementById("year");
+    yearSelect.innerHTML = '<option value="">כל השנים</option>';
+    years.forEach(y => {
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    });
     render(ALL_DATA);
   } catch (e) {
     console.error(e);
-    document.getElementById("resultCount").textContent = "שגיאה בטעינת הנתונים";
+    countEl.textContent = "שגיאה בטעינת הנתונים – נסה לרענן";
   }
 }
 
@@ -22,19 +51,24 @@ function normalize(str) {
 function matches(record, filters) {
   if (filters.q) {
     const haystack = [
-      record.surname, record.forename, record.birthplace,
-      record.occupation, record.address, record.religion,
-      record.familyRelationship, record.notes, record.nationality_or_notes
+      field(record, "surname", "surName", "name"),
+      field(record, "forename", "foreName"),
+      field(record, "birthplace", "birthPlace"),
+      field(record, "occupation"),
+      addr(record),
+      field(record, "religion", "nationality", "nationalityReligion"),
+      field(record, "familyRelationship", "relationship"),
+      field(record, "notes", "remarks"),
     ].map(normalize).join(" ");
     if (!haystack.includes(filters.q)) return false;
   }
   if (filters.year && String(record.year) !== filters.year) return false;
-  if (filters.sex && record.sex !== filters.sex) return false;
-  if (filters.surname && !normalize(record.surname).includes(filters.surname)) return false;
-  if (filters.forename && !normalize(record.forename).includes(filters.forename)) return false;
-  if (filters.birthplace && !normalize(record.birthplace).includes(filters.birthplace)) return false;
-  if (filters.occupation && !normalize(record.occupation).includes(filters.occupation)) return false;
-  if (filters.address && !normalize(record.address).includes(filters.address)) return false;
+  if (filters.sex && field(record, "sex") !== filters.sex) return false;
+  if (filters.surname && !normalize(field(record, "surname", "surName", "name")).includes(filters.surname)) return false;
+  if (filters.forename && !normalize(field(record, "forename", "foreName")).includes(filters.forename)) return false;
+  if (filters.birthplace && !normalize(field(record, "birthplace", "birthPlace")).includes(filters.birthplace)) return false;
+  if (filters.occupation && !normalize(field(record, "occupation")).includes(filters.occupation)) return false;
+  if (filters.address && !normalize(addr(record)).includes(filters.address)) return false;
   return true;
 }
 
@@ -47,38 +81,67 @@ function getFilters() {
     forename: normalize(document.getElementById("forename").value),
     birthplace: normalize(document.getElementById("birthplace").value),
     occupation: normalize(document.getElementById("occupation").value),
-    address: normalize(document.getElementById("address").value)
+    address: normalize(document.getElementById("address").value),
   };
 }
 
-let currentResults = [];
-
 function render(results) {
   currentResults = results;
-  const tbody = document.querySelector("#results tbody");
-  tbody.innerHTML = "";
-
+  page = 0;
   document.getElementById("resultCount").textContent =
     results.length === 0 ? "אין תוצאות" : `${results.length.toLocaleString()} תוצאות`;
-
   document.getElementById("exportCsv").disabled = results.length === 0;
+  renderPage();
+}
 
-  results.forEach(r => {
+function renderPage() {
+  const tbody = document.querySelector("#results tbody");
+  tbody.innerHTML = "";
+  const start = page * PAGE_SIZE;
+  const slice = currentResults.slice(start, start + PAGE_SIZE);
+
+  slice.forEach(r => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${r.year || ""}</td>
-      <td>${r.surname || ""}</td>
-      <td>${r.forename || ""}</td>
-      <td>${r.sex || ""}</td>
-      <td>${r.age || ""}</td>
-      <td>${r.birthplace || ""}</td>
-      <td>${r.occupation || ""}</td>
-      <td>${r.address || ""}</td>
-      <td>${r.familyRelationship || ""}</td>
-      <td>${r.religion || ""}</td>
+      <td>${field(r, "surname", "surName", "name")}</td>
+      <td>${field(r, "forename", "foreName")}</td>
+      <td>${field(r, "sex")}</td>
+      <td>${field(r, "age")}</td>
+      <td>${field(r, "birthplace", "birthPlace")}</td>
+      <td>${field(r, "occupation")}</td>
+      <td>${addr(r)}</td>
+      <td>${field(r, "familyRelationship", "relationship")}</td>
+      <td>${field(r, "religion", "nationality", "nationalityReligion")}</td>
     `;
     tbody.appendChild(tr);
   });
+
+  // Pagination controls
+  let pager = document.getElementById("pager");
+  if (!pager) {
+    pager = document.createElement("div");
+    pager.id = "pager";
+    pager.className = "pager";
+    document.querySelector(".table-wrapper").after(pager);
+  }
+  const totalPages = Math.max(1, Math.ceil(currentResults.length / PAGE_SIZE));
+  pager.innerHTML = "";
+  if (currentResults.length > PAGE_SIZE) {
+    const prev = document.createElement("button");
+    prev.textContent = "הקודם";
+    prev.className = "secondary";
+    prev.disabled = page === 0;
+    prev.onclick = () => { page--; renderPage(); window.scrollTo({ top: document.querySelector(".table-wrapper").offsetTop - 20, behavior: "smooth" }); };
+    const info = document.createElement("span");
+    info.textContent = ` עמוד ${page + 1} מתוך ${totalPages} `;
+    const next = document.createElement("button");
+    next.textContent = "הבא";
+    next.className = "secondary";
+    next.disabled = page >= totalPages - 1;
+    next.onclick = () => { page++; renderPage(); window.scrollTo({ top: document.querySelector(".table-wrapper").offsetTop - 20, behavior: "smooth" }); };
+    pager.append(prev, info, next);
+  }
 }
 
 function search() {
@@ -89,16 +152,16 @@ function search() {
 
 function exportCsv() {
   if (!currentResults.length) return;
-  const headers = ["year","id","surname","forename","sex","age","birthplace","religion","occupation","address","maritalStatus","familyRelationship","notes"];
+  const headers = ["year", "id", "surname", "forename", "sex", "age", "birthplace", "religion", "occupation", "street", "houseNo", "maritalStatus", "familyRelationship", "notes"];
   const rows = currentResults.map(r =>
-    headers.map(h => `"${(r[h] || "").toString().replace(/"/g, '""')}"`).join(",")
+    headers.map(h => `"${(field(r, h) || "").toString().replace(/"/g, '""')}"`).join(",")
   );
   const csv = ["\uFEFF" + headers.join(","), ...rows].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `gibraltar-census-export.csv`;
+  a.download = "gibraltar-census-export.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -107,5 +170,4 @@ document.getElementById("searchBtn").addEventListener("click", search);
 document.getElementById("q").addEventListener("keydown", e => { if (e.key === "Enter") search(); });
 document.getElementById("exportCsv").addEventListener("click", exportCsv);
 
-// Load on start
 loadData();

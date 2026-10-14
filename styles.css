@@ -126,7 +126,7 @@ button.secondary {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  margin-bottom: 2rem;
+  margin-bottom: 0.75rem;
 }
 
 table {
@@ -150,6 +150,16 @@ th {
 }
 
 tr:hover td { background: #faf8f5; }
+
+.pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
 
 .info {
   background: var(--card);
