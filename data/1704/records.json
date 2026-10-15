@@ -1,0 +1,371 @@
+[
+  {
+    "year": 1704,
+    "id": "40",
+    "name": "Andres de Soza & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 1,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "27",
+    "name": "Andress de Arenas & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 2,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "34",
+    "name": "Baltasare de los Reyes",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 3,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "8",
+    "name": "Bartolome Gonzales: El Campanero",
+    "occupation": "Bell Ringer",
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 4,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "15",
+    "name": "Bernardo Rodrigues & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 5,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "32",
+    "name": "Diego Lorenzo & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 6,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "5",
+    "name": "Diego Romo",
+    "occupation": "Frayle (Friar)",
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 7,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "23",
+    "name": "Diego Ximenes & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 8,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "1",
+    "name": "Don Fernando Truxillo",
+    "occupation": "M.D. Doctor",
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 9,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "31",
+    "name": "Estephan de Uriate & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 10,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "35",
+    "name": "Fernando Rodrigues & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 11,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "19",
+    "name": "Francisco de Tapia",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 12,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "37",
+    "name": "Francisco Galves",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 13,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "33",
+    "name": "Francisco Obegero & Wife",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 14,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "14",
+    "name": "Francisco Verde",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 15,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "29",
+    "name": "Francisco Ximenes & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 16,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "7",
+    "name": "Gabriel de Miranda",
+    "occupation": "Frayle (Friar)",
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 17,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "22",
+    "name": "Gonzalo Romero & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 18,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "6",
+    "name": "Hermano Juan el Hermita?o (Brother John the Hermit)",
+    "occupation": "Hermit",
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 19,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "26",
+    "name": "Jacome de Pluma & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 20,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "17",
+    "name": "Jaime Barleta & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 21,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "11",
+    "name": "Joseph de Anguita & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 22,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "28",
+    "name": "Joseph de Espinosa",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 23,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "3",
+    "name": "Joseph de Peña",
+    "occupation": "Clerico (Priest)",
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 24,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "21",
+    "name": "Juan Bautista Gaza & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 25,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "13",
+    "name": "Juan de Tanigar & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 26,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "18",
+    "name": "Juan Guerrero and Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 27,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "4",
+    "name": "Juan Nu?es",
+    "occupation": "Frayle (Friar)",
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 28,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "2",
+    "name": "Juan Romero de Figueroa",
+    "occupation": "Vicario (Priest)",
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 29,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "25",
+    "name": "Juan Viera & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 30,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "16",
+    "name": "Magdalena de Guzman & Daughter",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 31,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "38",
+    "name": "Marco Peres & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 32,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "36",
+    "name": "Maria Baratona",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 33,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "12",
+    "name": "Maria Machada & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 34,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "41",
+    "name": "Mariana de Sosa",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 35,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "39",
+    "name": "Michael Ferez & Brother",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 36,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "30",
+    "name": "Nicholas de la Rosa & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 37,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "24",
+    "name": "Palomino & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 38,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "20",
+    "name": "Pedro de Mesa",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 39,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "9",
+    "name": "Pedro de Robles & his Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 40,
+    "total_records": 41
+  },
+  {
+    "year": 1704,
+    "id": "10",
+    "name": "Pedro Machado & Family",
+    "occupation": null,
+    "datasource": "TNA CO 91_1 folio 14 Gibraltar inhabitants 1704",
+    "record_num": 41,
+    "total_records": 41
+  }
+]
