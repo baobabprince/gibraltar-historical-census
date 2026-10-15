@@ -6,7 +6,7 @@ on:
       year:
         description: 'Census year to scrape'
         required: true
-        default: '1911'
+        default: '1834'
         type: choice
         options:
           - '1704'
@@ -26,7 +26,7 @@ on:
       max_records:
         description: 'Maximum number of NEW records to fetch in this run'
         required: true
-        default: '100'
+        default: '10000'
         type: string
       delay:
         description: 'Delay between requests while collecting (seconds)'
