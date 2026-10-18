@@ -19,10 +19,10 @@ data/
   1891/   # 19,057 / 19,057 (complete)
   1901/   # 19,342 / 19,342 (complete)
   1911/   # 14,951 / 14,951 (complete)
-  1914/   # 10,000 / 16,535 (in progress)
+  1914/   # 16,535 / 16,535 (complete)
 ```
 
-**Total: ~167,000 records** (13 of 14 years complete).
+**All 14 years complete — 173,877 records.**
 
 Each year folder contains:
 - `records.json` – full structured records
