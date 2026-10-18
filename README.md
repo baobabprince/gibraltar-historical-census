@@ -18,16 +18,16 @@ Converts the outdated ASP.NET interface into a clean, filterable dataset hosted 
 | 1814 | 1,853 | **1,853** | complete |
 | 1816 | 6,679 | **6,679** | complete |
 | 1834 | 14,569 | **14,569** | complete |
-| 1868 | 15,405 | **10,000** | in progress |
+| 1868 | 15,405 | **15,405** | complete |
 | 1871 | 22,725 | **22,725** | complete |
-| 1878 | 17,982 | — | not started |
-| 1881 | 18,616 | — | not started |
-| 1891 | 19,057 | — | not started |
-| 1901 | 19,342 | — | not started |
+| 1878 | 17,982 | **17,982** | complete |
+| 1881 | 18,616 | **18,616** | complete |
+| 1891 | 19,057 | **19,057** | complete |
+| 1901 | 19,342 | **19,342** | complete |
 | 1911 | 14,951 | **14,951** | complete |
-| 1914 | 16,535 | — | not started |
+| 1914 | 16,535 | **10,000** | in progress |
 
-**Total extracted so far: ~77,000 records** across 9 years.
+**Total extracted so far: ~167,000 records** (13 of 14 years complete).
 
 Files per year: `data/{year}/records.json`, `records.csv`, `meta.json`
 
@@ -37,7 +37,7 @@ Supports years: **1704, 1777, 1791, 1814, 1816, 1834, 1868, 1871, 1878, 1881, 18
 
 ```bash
 pip install -r requirements.txt
-python scripts/scrape_census.py --year 1868 --max 500 --delay 0.4 --skip-delay 0.05
+python scripts/scrape_census.py --year 1914 --max 500 --delay 0.4 --skip-delay 0.05
 ```
 
 Auto-resumes from the last extracted record. Use `--skip-delay` for faster advancement when resuming large runs.
