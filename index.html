@@ -20,32 +20,39 @@
   <main class="container">
     <section class="search-panel">
       <div class="search-row">
-        <input type="search" id="q" placeholder="חיפוש חופשי (שם, כתובת, עיסוק...)" autocomplete="off">
-        <button id="searchBtn">חפש</button>
+        <input type="search" id="q" placeholder="חיפוש חופשי (שם, כתובת, עיסוק, הערות...)" autocomplete="off">
+        <button id="searchBtn" type="button">חפש</button>
+        <button id="clearBtn" type="button" class="secondary">נקה</button>
       </div>
 
       <div class="filters">
-        <select id="year">
+        <select id="year" title="שנת מפקד">
           <option value="">כל השנים</option>
         </select>
 
-        <select id="sex">
+        <select id="sex" title="מין">
           <option value="">מין</option>
           <option value="M">זכר</option>
           <option value="F">נקבה</option>
         </select>
 
-        <input type="text" id="surname" placeholder="שם משפחה">
-        <input type="text" id="forename" placeholder="שם פרטי">
-        <input type="text" id="birthplace" placeholder="מקום לידה">
-        <input type="text" id="occupation" placeholder="עיסוק">
-        <input type="text" id="address" placeholder="כתובת / רחוב">
+        <input type="text" id="surname" placeholder="שם משפחה" autocomplete="off">
+        <input type="text" id="forename" placeholder="שם פרטי" autocomplete="off">
+        <input type="text" id="birthplace" placeholder="מקום לידה" autocomplete="off">
+        <input type="text" id="occupation" placeholder="עיסוק" autocomplete="off">
+        <input type="text" id="address" placeholder="כתובת / רחוב" autocomplete="off">
+        <input type="text" id="religion" placeholder="דת / לאום" autocomplete="off">
+        <input type="text" id="marital" placeholder="מצב משפחתי" autocomplete="off">
+        <input type="text" id="relationship" placeholder="קשר משפחתי" autocomplete="off">
+        <input type="text" id="district" placeholder="מחוז / אזור" autocomplete="off">
+        <input type="number" id="ageMin" placeholder="גיל מ־" min="0" max="120" inputmode="numeric">
+        <input type="number" id="ageMax" placeholder="גיל עד" min="0" max="120" inputmode="numeric">
       </div>
     </section>
 
     <section class="results-meta">
       <span id="resultCount">טוען...</span>
-      <button id="exportCsv" class="secondary" disabled>ייצוא CSV</button>
+      <button id="exportCsv" class="secondary" disabled type="button">ייצוא CSV</button>
     </section>
 
     <section class="table-wrapper">
@@ -62,6 +69,8 @@
             <th>כתובת</th>
             <th>קשר משפחתי</th>
             <th>דת / לאום</th>
+            <th>מצב משפחתי</th>
+            <th>מחוז</th>
           </tr>
         </thead>
         <tbody></tbody>

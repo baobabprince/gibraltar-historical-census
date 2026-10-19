@@ -1,44 +1,131 @@
 #!/usr/bin/env python3
 """Build slim JSON files for the GitHub Pages frontend.
 
-Keeps only fields needed for search/display so the site stays small and
-Pages deploys stay under the 10-minute limit.
+Normalizes field aliases across census years so search/filters work
+consistently, and keeps only fields needed for search/display.
 """
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-SLIM_KEYS = [
-    "year",
-    "id",
-    "surname",
-    "forename",
-    "sex",
-    "age",
-    "birthplace",
-    "occupation",
-    "street",
-    "houseNo",
-    "familyRelationship",
-    "religion",
-    "maritalStatus",
-]
 
-STREET_ALIASES = ("street", "address", "streetName", "streetname")
+def first(r: dict, *keys: str):
+    for k in keys:
+        v = r.get(k)
+        if v is not None and v != "":
+            return v
+    return None
 
 
 def slim_record(r: dict) -> dict:
+    year = r.get("year")
     row = {}
-    for k in SLIM_KEYS:
-        v = r.get(k)
-        if v is not None and v != "":
-            row[k] = v
-    if "street" not in row:
-        for alt in STREET_ALIASES:
-            if r.get(alt):
-                row["street"] = r[alt]
-                break
+    if year is not None:
+        row["year"] = year
+
+    rid = first(r, "id", "listid")
+    if rid is not None:
+        row["id"] = rid
+
+    surname = first(
+        r,
+        "surname",
+        "surName",
+        "tenantsurname",
+        "occupantsurname",
+        "ownersurname",
+        "propietorsurname",
+        "name",
+    )
+    if surname is not None:
+        row["surname"] = surname
+
+    forename = first(
+        r,
+        "forename",
+        "foreName",
+        "tenantforename",
+        "occupantforename",
+        "ownerforename",
+        "proprietorforename",
+    )
+    if forename is not None:
+        row["forename"] = forename
+
+    sex = first(r, "sex")
+    if sex is not None:
+        row["sex"] = sex
+
+    age = first(r, "age")
+    if age is not None:
+        row["age"] = age
+
+    birthplace = first(r, "birthplace", "birthPlace", "country")
+    if birthplace is not None:
+        row["birthplace"] = birthplace
+
+    occupation = first(
+        r,
+        "occupation",
+        "tradeprofessionoccupation",
+        "trade_profession_occupation",
+    )
+    if occupation is not None:
+        row["occupation"] = occupation
+
+    street = first(
+        r,
+        "street",
+        "address",
+        "streetName",
+        "streetname",
+        "situation",
+    )
+    if street is not None:
+        row["street"] = street
+
+    house = first(r, "houseNo", "houseno", "hseNo", "hseno")
+    if house is not None:
+        row["houseNo"] = house
+
+    rel = first(r, "familyRelationship", "familyrelationship", "relationship")
+    if rel is not None:
+        row["familyRelationship"] = rel
+
+    religion = first(
+        r,
+        "religion",
+        "nationalityReligion",
+        "nationality",
+        "nation",
+        "nat_reg",
+    )
+    if religion is not None:
+        row["religion"] = religion
+
+    marital = first(r, "maritalStatus", "maritalstatus", "status")
+    if marital is not None:
+        row["maritalStatus"] = marital
+
+    district = first(r, "district", "districtname")
+    if district is not None:
+        row["district"] = district
+
+    yor = first(
+        r,
+        "yearsOfResidence",
+        "yearsofresidence",
+        "howlongresident",
+        "tenantresdncylgth",
+    )
+    if yor is not None:
+        row["yearsOfResidence"] = yor
+
+    notes = first(r, "notes", "remarks", "comments", "notes1")
+    if notes is not None:
+        row["notes"] = notes
+
     return row
 
 

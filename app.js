@@ -4,6 +4,23 @@ let currentResults = [];
 let page = 0;
 const PAGE_SIZE = 100;
 
+const FILTER_IDS = [
+  "q",
+  "year",
+  "sex",
+  "surname",
+  "forename",
+  "birthplace",
+  "occupation",
+  "address",
+  "religion",
+  "marital",
+  "relationship",
+  "district",
+  "ageMin",
+  "ageMax",
+];
+
 function field(r, ...keys) {
   for (const k of keys) {
     if (r[k] != null && r[k] !== "") return r[k];
@@ -18,11 +35,16 @@ function addr(r) {
   return street || house || "";
 }
 
+function parseAge(v) {
+  if (v == null || v === "") return null;
+  const n = parseInt(String(v).replace(/[^0-9]/g, ""), 10);
+  return Number.isFinite(n) ? n : null;
+}
+
 async function loadData() {
   const countEl = document.getElementById("resultCount");
   countEl.textContent = "טוען נתונים...";
   try {
-    // Prefer data/index.json (built by Pages workflow); fall back to known years
     let years = [];
     try {
       const idxRes = await fetch("data/index.json");
@@ -33,10 +55,10 @@ async function loadData() {
     } catch (_) {}
 
     if (!years.length) {
-      years = [
-        { year: 1911, file: "data/1911/records.slim.json" },
-        { year: 1871, file: "data/1871/records.slim.json" },
-      ];
+      // Fallback: known complete years
+      years = [1704, 1777, 1791, 1814, 1816, 1834, 1868, 1871, 1878, 1881, 1891, 1901, 1911, 1914].map(
+        y => ({ year: y, file: `data/${y}/records.slim.json` })
+      );
     }
 
     const loaded = [];
@@ -45,7 +67,6 @@ async function loadData() {
       try {
         const res = await fetch(path);
         if (!res.ok) {
-          // fallback to full JSON if slim missing
           const full = await fetch(`data/${y.year}/records.json`);
           if (!full.ok) continue;
           const data = await full.json();
@@ -97,14 +118,19 @@ function matches(record, filters) {
       addr(record),
       field(record, "religion", "nationality", "nationalityReligion"),
       field(record, "familyRelationship", "relationship"),
+      field(record, "maritalStatus", "maritalstatus", "status"),
+      field(record, "district"),
       field(record, "notes", "remarks"),
+      field(record, "yearsOfResidence"),
     ]
       .map(normalize)
       .join(" ");
     if (!haystack.includes(filters.q)) return false;
   }
+
   if (filters.year && String(record.year) !== filters.year) return false;
   if (filters.sex && field(record, "sex") !== filters.sex) return false;
+
   if (
     filters.surname &&
     !normalize(field(record, "surname", "surName", "name")).includes(filters.surname)
@@ -126,10 +152,47 @@ function matches(record, filters) {
   )
     return false;
   if (filters.address && !normalize(addr(record)).includes(filters.address)) return false;
+
+  if (
+    filters.religion &&
+    !normalize(
+      field(record, "religion", "nationality", "nationalityReligion")
+    ).includes(filters.religion)
+  )
+    return false;
+  if (
+    filters.marital &&
+    !normalize(field(record, "maritalStatus", "maritalstatus", "status")).includes(
+      filters.marital
+    )
+  )
+    return false;
+  if (
+    filters.relationship &&
+    !normalize(field(record, "familyRelationship", "relationship")).includes(
+      filters.relationship
+    )
+  )
+    return false;
+  if (
+    filters.district &&
+    !normalize(field(record, "district")).includes(filters.district)
+  )
+    return false;
+
+  if (filters.ageMin != null || filters.ageMax != null) {
+    const age = parseAge(field(record, "age"));
+    if (age == null) return false;
+    if (filters.ageMin != null && age < filters.ageMin) return false;
+    if (filters.ageMax != null && age > filters.ageMax) return false;
+  }
+
   return true;
 }
 
 function getFilters() {
+  const ageMinRaw = document.getElementById("ageMin").value;
+  const ageMaxRaw = document.getElementById("ageMax").value;
   return {
     q: normalize(document.getElementById("q").value),
     year: document.getElementById("year").value,
@@ -139,7 +202,23 @@ function getFilters() {
     birthplace: normalize(document.getElementById("birthplace").value),
     occupation: normalize(document.getElementById("occupation").value),
     address: normalize(document.getElementById("address").value),
+    religion: normalize(document.getElementById("religion").value),
+    marital: normalize(document.getElementById("marital").value),
+    relationship: normalize(document.getElementById("relationship").value),
+    district: normalize(document.getElementById("district").value),
+    ageMin: ageMinRaw === "" ? null : parseInt(ageMinRaw, 10),
+    ageMax: ageMaxRaw === "" ? null : parseInt(ageMaxRaw, 10),
   };
+}
+
+function clearFilters() {
+  FILTER_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.tagName === "SELECT") el.selectedIndex = 0;
+    else el.value = "";
+  });
+  render(ALL_DATA);
 }
 
 function render(results) {
@@ -170,6 +249,8 @@ function renderPage() {
       <td>${addr(r)}</td>
       <td>${field(r, "familyRelationship", "relationship")}</td>
       <td>${field(r, "religion", "nationality", "nationalityReligion")}</td>
+      <td>${field(r, "maritalStatus", "maritalstatus", "status")}</td>
+      <td>${field(r, "district")}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -187,6 +268,7 @@ function renderPage() {
     const prev = document.createElement("button");
     prev.textContent = "הקודם";
     prev.className = "secondary";
+    prev.type = "button";
     prev.disabled = page === 0;
     prev.onclick = () => {
       page--;
@@ -201,6 +283,7 @@ function renderPage() {
     const next = document.createElement("button");
     next.textContent = "הבא";
     next.className = "secondary";
+    next.type = "button";
     next.disabled = page >= totalPages - 1;
     next.onclick = () => {
       page++;
@@ -230,15 +313,25 @@ function exportCsv() {
     "sex",
     "age",
     "birthplace",
-    "religion",
     "occupation",
     "street",
     "houseNo",
-    "maritalStatus",
     "familyRelationship",
+    "religion",
+    "maritalStatus",
+    "district",
+    "yearsOfResidence",
+    "notes",
   ];
   const rows = currentResults.map(r =>
-    headers.map(h => `"${(field(r, h) || "").toString().replace(/"/g, '""')}"`).join(",")
+    headers
+      .map(h => {
+        let v;
+        if (h === "street") v = field(r, "street", "address");
+        else v = field(r, h);
+        return `"${(v || "").toString().replace(/"/g, '""')}"`;
+      })
+      .join(",")
   );
   const csv = ["\uFEFF" + headers.join(","), ...rows].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -251,9 +344,20 @@ function exportCsv() {
 }
 
 document.getElementById("searchBtn").addEventListener("click", search);
-document.getElementById("q").addEventListener("keydown", e => {
-  if (e.key === "Enter") search();
-});
+document.getElementById("clearBtn").addEventListener("click", clearFilters);
 document.getElementById("exportCsv").addEventListener("click", exportCsv);
+
+FILTER_IDS.forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("keydown", e => {
+    if (e.key === "Enter") search();
+  });
+});
+
+// Auto-search when year/sex dropdown changes
+["year", "sex"].forEach(id => {
+  document.getElementById(id).addEventListener("change", search);
+});
 
 loadData();
